@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developers - Quauzium</title>
+  <link rel="icon" href="logos/logo.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #007bff;
+      --secondary: #00eaff;
+      --accent: #ff4757;
+      --dark-bg: #121212;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --text-primary: #fff;
+      --text-secondary: #bbb;
+      --sidebar-width: 220px;
+      --main-margin: 240px;
+      --header-height: 70px;
+    }
+
+    /* Seasonal Themes */
+    .season-winter {
+      --primary: #4dabf5;
+      --secondary: #a5d8ff;
+      --accent: #ff8787;
+      --dark-bg: #0f1a2a;
+    }
+
+    .season-spring {
+      --primary: #69db7c;
+      --secondary: #b2f2bb;
+      --accent: #ffa94d;
+      --dark-bg: #1a2f1a;
+    }
+
+    .season-summer {
+      --primary: #ffd43b;
+      --secondary: #ffec99;
+      --accent: #ff6b6b;
+      --dark-bg: #2a1f0f;
+    }
+
+    .season-autumn {
+      --primary: #e8590c;
+      --secondary: #ffc078;
+      --accent: #cc5de8;
+      --dark-bg: #2a1a0f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top, #0f2027, var(--dark-bg));
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: all 0.8s ease;
+    }
+
+    /* Seasonal Background Overlays */
+    .season-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.15;
+      transition: opacity 0.8s ease;
+    }
+
+    .winter-overlay {
+      background:
+        radial-gradient(circle at 20% 80%, rgba(180, 220, 255, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(230, 240, 255, 0.2) 0%, transparent 50%),
+        linear-gradient(45deg, rgba(100, 150, 200, 0.1) 0%, transparent 50%);
+    }
+
+    .spring-overlay {
+      background:
+        radial-gradient(circle at 30% 70%, rgba(150, 240, 180, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(220, 255, 200, 0.2) 0%, transparent 50%),
+        linear-gradient(45deg, rgba(120, 220, 160, 0.1) 0%, transparent 50%);
+    }
+
+    .summer-overlay {
+      background:
+        radial-gradient(circle at 40% 60%, rgba(255, 230, 100, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 60% 40%, rgba(255, 240, 150, 0.2) 0%, transparent 50%),
+        linear-gradient(45deg, rgba(255, 200, 80, 0.1) 0%, transparent 50%);
+    }
+
+    .autumn-overlay {
+      background:
+        radial-gradient(circle at 25% 75%, rgba(220, 150, 80, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 75% 25%, rgba(240, 180, 100, 0.2) 0%, transparent 50%),
+        linear-gradient(45deg, rgba(200, 130, 60, 0.1) 0%, transparent 50%);
+    }
+
+    /* Background grid */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: moveGrid 25s linear infinite;
+      z-index: -2;
+    }
+
+    @keyframes moveGrid {
+      from {
+        background-position: 0 0, 0 0;
+      }
+
+      to {
+        background-position: 100px 100px, 100px 100px;
+      }
+    }
+
+    /* Particle System */
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Header for mobile */
+    .header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      padding: 0 20px;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-size: 1.2em;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 1.4em;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      transition: 0.3s;
+      font-size: 0.95em;
+    }
+
+    .sidebar a i {
+      margin-right: 10px;
+      color: var(--secondary);
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background: rgba(0, 123, 255, 0.15);
+      color: var(--text-primary);
+    }
+
+    /* Main content */
+    .main {
+      margin-left: var(--main-margin);
+      padding: 40px 20px;
+      flex: 1;
+      transition: margin-left 0.3s ease, padding 0.3s ease;
+    }
+
+    .welcome {
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    .welcome h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin-bottom: 10px;
+      animation: glow 2s ease-in-out infinite alternate;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome p {
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: auto;
+    }
+
+    /* Season indicator */
+    .season-indicator {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .season-indicator i {
+      color: var(--secondary);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px var(--primary);
+      }
+
+      to {
+        text-shadow: 0 0 15px var(--secondary);
+      }
+    }
+
+    /* Mobile sidebar collapse */
+    .toggle-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      font-size: 1.2em;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 150;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-btn:hover {
+      background: var(--secondary);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 968px) {
+      :root {
+        --main-margin: 0;
+      }
+
+      .header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        top: var(--header-height);
+        height: calc(100% - var(--header-height));
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 30px 15px;
+        padding-top: calc(var(--header-height) + 30px);
+      }
+
+      .toggle-btn {
+        display: block;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .welcome h1 {
+        margin-top: 0;
+      }
+
+      .season-indicator {
+        top: 80px;
+        right: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main {
+        padding: 20px 10px;
+        padding-top: calc(var(--header-height) + 20px);
+      }
+
+      .welcome {
+        margin-bottom: 30px;
+      }
+    }
+
+    /* Developer page specific styles */
+    .dev-container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .dev-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .team-section {
+      margin-bottom: 50px;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .team-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .team-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px var(--primary);
+      border-color: var(--secondary);
+    }
+
+    .team-card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border: 3px solid var(--secondary);
+      transition: all 0.3s ease;
+    }
+
+    .team-card:hover img {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--secondary);
+    }
+
+    .team-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .team-card .role {
+      color: var(--secondary);
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .team-card .bio {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .skill-tag {
+      background: rgba(0, 123, 255, 0.2);
+      color: var(--secondary);
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+
+    .team-card:hover .skill-tag {
+      background: rgba(0, 123, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .social-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+      transform: translateY(-3px);
+    }
+
+    .social-links a.facebook:hover {
+      background: #3b5998;
+    }
+
+    .social-links a.instagram:hover {
+      background: #e4405f;
+    }
+
+    .social-links a.tiktok:hover {
+      background: #000000;
+    }
+
+    /* Resize indicator */
+    .resize-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--secondary);
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .resize-indicator.visible {
+      opacity: 1;
+    }
+
+    /* Seasonal decorations */
+    .season-decoration {
+      position: fixed;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.3;
+      transition: opacity 0.8s ease;
+    }
+
+    .snowflake,
+    .flower,
+    .sun,
+    .leaf {
+      position: absolute;
+      animation: float 15s infinite linear;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(-10px) rotate(0deg);
+      }
+
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header for mobile -->
+  <div class="header">
+    <h1>Qauzium</h1>
+    <button class="toggle-btn" id="sidebarToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>Qauzium</h2>
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="explore.html"><i class="fas fa-compass"></i> Explore</a>
+    <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+    <a href="dev.html" class="active"><i class="fas fa-code"></i> Developers</a>
+    <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+    <div style="margin-top: auto; padding: 15px 0;">
+      <a href="#" id="theme-toggle"><i class="fas fa-moon"></i> Dark Mode</a>
+    </div>
+  </div>
+
+  <!-- Overlay for mobile -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Seasonal Overlays -->
+  <div class="season-overlay winter-overlay" id="winterOverlay"></div>
+  <div class="season-overlay spring-overlay" id="springOverlay"></div>
+  <div class="season-overlay summer-overlay" id="summerOverlay"></div>
+  <div class="season-overlay autumn-overlay" id="autumnOverlay"></div>
+
+  <!-- Particle System Container -->
+  <div id="particles-js"></div>
+
+  <!-- Resize indicator -->
+  <div class="resize-indicator" id="resizeIndicator"></div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="dev-container">
+      <div class="season-indicator" id="seasonIndicator">
+        <i class="fas fa-leaf" id="seasonIcon"></i>
+        <span id="seasonText">Season</span>
+      </div>
+
+      <div class="dev-header">
+        <h1>Our Development Team</h1>
+        <p>Meet the talented individuals behind Qauzium</p>
+      </div>
+
+      <div class="team-section">
+        <h2>Leadership</h2>
+        <div class="team-grid">
+          <div class="team-card">
+            <!-- Replace with your actual image -->
+            <img src="logos/clint.jpeg" alt="Clint Johnryl Henon Dagno">
+            <h3>Clint Johnryl Henon Dagno</h3>
+            <div class="role">Head Developer</div>
+            <div class="skills">
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">C++</span>
+              <span class="skill-tag">HTML</span>
+              <span class="skill-tag">Julia</span>
+            </div>
+            <div class="bio">Currently learning programming with a focus on Python, C++, and web development. Passionate
+              about creating efficient and user-friendly applications.</div>
+            <div class="social-links">
+              <a href="https://www.facebook.com/clint.johnryl.henon.dagno.2025/" class="facebook" target="_blank"><i
+                  class="fab fa-facebook-f"></i></a>
+              <a href="https://www.instagram.com/clintjohnrylhenondagno/" class="instagram" target="_blank"><i
+                  class="fab fa-instagram"></i></a>
+              <a href="https://www.tiktok.com/@javew_xasemba" class="tiktok" target="_blank"><i
+                  class="fab fa-tiktok"></i></a>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <!-- Replace with Kyle's actual image -->
+            <img src="logos/kyle.jpg" alt="Kyle Justine">
+            <h3>Kyle Justine</h3>
+            <div class="role">Vice-Head Developer</div>
+            <div class="skills">
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">HTML</span>
+            </div>
+            <div class="bio">Skilled in Python programming and web development with HTML. Focused on creating clean,
+              functional code and intuitive user interfaces.</div>
+            <div class="social-links">
+              <a href="https://www.facebook.com/kylejustine.ricarde" class="facebook" target="_blank"><i
+                  class="fab fa-facebook-f"></i></a>
+              <a href="https:" class="instagram" target="_blank"><i class="fab fa-instagram"></i></a>
+              <a href="https://tiktok.com/@clijo_developer" class="tiktok" target="_blank"><i
+                  class="fab fa-tiktok"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include particles.js library -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+  <script>
+    // DOM Elements
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const themeToggle = document.getElementById('theme-toggle');
+    const resizeIndicator = document.getElementById('resizeIndicator');
+    const seasonIndicator = document.getElementById('seasonIndicator');
+    const seasonText = document.getElementById('seasonText');
+    const seasonIcon = document.getElementById('seasonIcon');
+
+    // Seasonal data
+    const seasons = {
+      winter: {
+        name: "Winter",
+        icon: "fa-snowflake",
+        months: [11, 0, 1], // Dec, Jan, Feb
+        colors: {
+          primary: "#4dabf5",
+          secondary: "#a5d8ff",
+          accent: "#ff8787",
+          bg: "#0f1a2a"
+        }
+      },
+      spring: {
+        name: "Spring",
+        icon: "fa-seedling",
+        months: [2, 3, 4], // Mar, Apr, May
+        colors: {
+          primary: "#69db7c",
+          secondary: "#b2f2bb",
+          accent: "#ffa94d",
+          bg: "#1a2f1a"
+        }
+      },
+      summer: {
+        name: "Summer",
+        icon: "fa-sun",
+        months: [5, 6, 7], // Jun, Jul, Aug
+        colors: {
+          primary: "#ffd43b",
+          secondary: "#ffec99",
+          accent: "#ff6b6b",
+          bg: "#2a1f0f"
+        }
+      },
+      autumn: {
+        name: "Autumn",
+        icon: "fa-leaf",
+        months: [8, 9, 10], // Sep, Oct, Nov
+        colors: {
+          primary: "#e8590c",
+          secondary: "#ffc078",
+          accent: "#cc5de8",
+          bg: "#2a1a0f"
+        }
+      }
+    };
+
+    // Function to determine current season
+    function getCurrentSeason() {
+      const now = new Date();
+      const month = now.getMonth();
+
+      for (const [season, data] of Object.entries(seasons)) {
+        if (data.months.includes(month)) {
+          return season;
+        }
+      }
+
+      return "winter"; // Default fallback
+    }
+
+    // Apply seasonal theme
+    function applySeasonalTheme(season) {
+      const seasonData = seasons[season];
+
+      // Remove all season classes
+      document.body.classList.remove("season-winter", "season-spring", "season-summer", "season-autumn");
+
+      // Hide all seasonal overlays
+      document.querySelectorAll('.season-overlay').forEach(overlay => {
+        overlay.style.opacity = "0";
+      });
+
+      // Apply the current season class
+      document.body.classList.add(`season-${season}`);
+
+      // Show the current season overlay
+      const currentOverlay = document.getElementById(`${season}Overlay`);
+      if (currentOverlay) {
+        currentOverlay.style.opacity = "0.15";
+      }
+
+      // Update season indicator
+      seasonText.textContent = seasonData.name;
+      seasonIcon.className = `fas ${seasonData.icon}`;
+
+      // Update particles for the season
+      updateParticles(season);
+
+      // Add seasonal decorations
+      addSeasonalDecorations(season);
+    }
+
+    // Update particles based on season
+    function updateParticles(season) {
+      const seasonColors = seasons[season].colors;
+
+      if (window.pJSDom && window.pJSDom[0] && window.pJSDom[0].pJS) {
+        const pJS = window.pJSDom[0].pJS;
+
+        // Update particle colors
+        pJS.particles.color.value = seasonColors.secondary;
+        pJS.particles.line_linked.color = seasonColors.primary;
+
+        // Refresh particles
+        pJS.fn.particlesRefresh();
+      }
+    }
+
+    // Add seasonal decorations
+    function addSeasonalDecorations(season) {
+      // Remove existing decorations
+      document.querySelectorAll('.season-decoration').forEach(el => el.remove());
+
+      const decorationContainer = document.createElement('div');
+      decorationContainer.className = 'season-decoration';
+      document.body.appendChild(decorationContainer);
+
+      // Add decorations based on season
+      const count = 15; // Number of decorations
+
+      for (let i = 0; i < count; i++) {
+        const decoration = document.createElement('div');
+
+        // Set random position
+        const left = Math.random() * 100;
+        const animationDelay = Math.random() * 15;
+
+        decoration.style.left = `${left}%`;
+        decoration.style.animationDelay = `${animationDelay}s`;
+
+        // Set decoration type based on season
+        switch (season) {
+          case 'winter':
+            decoration.className = 'snowflake';
+            decoration.innerHTML = '❄';
+            decoration.style.fontSize = `${Math.random() * 12 + 10}px`;
+            break;
+          case 'spring':
+            decoration.className = 'flower';
+            decoration.innerHTML = '🌸';
+            decoration.style.fontSize = `${Math.random() * 14 + 12}px`;
+            break;
+          case 'summer':
+            decoration.className = 'sun';
+            decoration.innerHTML = '☀️';
+            decoration.style.fontSize = `${Math.random() * 16 + 14}px`;
+            break;
+          case 'autumn':
+            decoration.className = 'leaf';
+            decoration.innerHTML = '🍁';
+            decoration.style.fontSize = `${Math.random() * 14 + 12}px`;
+            break;
+        }
+
+        decorationContainer.appendChild(decoration);
+      }
+    }
+
+    // Initialize particle system
+    function initParticles() {
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 40, density: { enable: true, value_area: 800 } },
+          color: { value: "#00eaff" },
+          shape: { type: "circle" },
+          opacity: { value: 0.5, random: true },
+          size: { value: 3, random: true },
+          line_linked: {
+            enable: true,
+            distance: 150,
+            color: "#007bff",
+            opacity: 0.2,
+            width: 1
+          },
+          move: {
+            enable: true,
+            speed: 1,
+            direction: "none",
+            random: true,
+            straight: false,
+            out_mode: "out",
+            bounce: false
+          }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: { enable: true, mode: "repulse" },
+            onclick: { enable: true, mode: "push" },
+            resize: true
+          }
+        },
+        retina_detect: true
+      });
+    }
+
+    // Mobile sidebar toggle
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking overlay
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+
+    // Theme toggle functionality with enhanced transition
+    themeToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      // Add transition class to body for smooth theme change
+      document.body.classList.add('theme-transition');
+
+      setTimeout(() => {
+        const isDark = document.body.classList.toggle('light-theme');
+
+        if (isDark) {
+          themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+          // Update CSS variables for light theme
+          document.documentElement.style.setProperty('--dark-bg', '#f5f5f5');
+          document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.8)');
+          document.documentElement.style.setProperty('--text-primary', '#333');
+          document.documentElement.style.setProperty('--text-secondary', '#666');
+        } else {
+          themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+          // Revert to dark theme variables
+          document.documentElement.style.setProperty('--dark-bg', '#121212');
+          document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.05)');
+          document.documentElement.style.setProperty('--text-primary', '#fff');
+          document.documentElement.style.setProperty('--text-secondary', '#bbb');
+        }
+
+        // Remove transition class after theme change
+        setTimeout(() => {
+          document.body.classList.remove('theme-transition');
+        }, 500);
+      }, 100);
+    });
+
+    // Window resize handler
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      // Show resize indicator
+      resizeIndicator.textContent = `${window.innerWidth} × ${window.innerHeight}`;
+      resizeIndicator.classList.add('visible');
+
+      // Clear the timeout if it has already been set
+      clearTimeout(resizeTimeout);
+
+      // Hide resize indicator after 1 second
+      resizeTimeout = setTimeout(() => {
+        resizeIndicator.classList.remove('visible');
+      }, 1000);
+
+      // Handle sidebar on resize
+      if (window.innerWidth > 968) {
+        // For larger screens, ensure sidebar is visible
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+      } else {
+        // For smaller screens, ensure sidebar is hidden by default
+        if (!sidebar.classList.contains('active')) {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+        }
+      }
+    });
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize particles
+      initParticles();
+
+      // Apply seasonal theme
+      const currentSeason = getCurrentSeason();
+      applySeasonalTheme(currentSeason);
+    });
+
+    // Initial call to handle responsive layout on load
+    window.dispatchEvent(new Event('resize'));
+  </script>
+</body>
+
+</html>
