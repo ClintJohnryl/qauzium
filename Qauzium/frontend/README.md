@@ -1,2 +1,0 @@
-# CliJo
-My page
